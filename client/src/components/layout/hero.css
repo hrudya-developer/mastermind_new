@@ -1,0 +1,6 @@
+.gradient-text {
+  background: linear-gradient(to right, #005fed, #9624ff, #166de5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.buttonGradient{background: linear-gradient(to right, #005fed, #9624ff, #166de5);}

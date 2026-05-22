@@ -1,0 +1,115 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap'); */
+/* @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;400;600;800&display=swap'); */
+
+/* @import "tailwindcss";
+@plugin "daisyui"; */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+
+:root {
+  /* 🎨 Colors (RGB format) */
+  --primary: 1 125 192;        /* #017dc0 */
+  --secondary: 5 23 106;        /* #082e5a */
+  --light-grey: 219 221 222;   /* #dbddde */
+  --text-color: 44 43 43;      /* #2c2b2b */
+  --light-blue: 0 182 232;     /* #00b6e8 */
+
+  /* Fonts */
+  --font-main: 'Poppins', sans-serif;
+  /* --font-heading: 'Cairo', sans-serif; */
+
+  /* Shadow */
+  --shadow: -1px 2px 1px rgba(0, 0, 0, 0.3);
+
+  /* Font sizes */
+  --fs-content: clamp(10px, 1.2vw, 12px);
+  --fs-heading: clamp(22px, 1.5vw + 10px, 33px);
+
+  /* UI colors */
+  --border: 229 231 235;       /* #e5e7eb */
+  --background: 255 255 255;   /* #ffffff */
+  --foreground: 17 24 39;      /* #111827 */
+  --ring: 156 163 175;         /* #9ca3af */
+
+  --border-radius: 8px;
+}
+
+.dark {
+  --background: 17 24 39;      /* #111827 */
+  --foreground: 255 255 255;   /* #ffffff */
+  --border: 255 255 255 / 0.1;
+  --ring: 156 163 175;
+}
+
+@layer base {
+  * {
+    border-color: rgb(var(--border));
+    outline-color: rgb(var(--ring) / 0.5);
+  }
+
+  body {
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
+    font-family: var(--font-main);
+    scroll-behavior: smooth;
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+    
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+.nav_menu a:hover{
+  color:#017dc0;
+   transition: all 0.3s ease;
+
+}
+@keyframes fadeIn {
+   from {
+    opacity: 0;
+    transform: translateY(10px) rotate(0deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(360deg);
+  }
+}
+.rotate-once {
+  animation: fadeInRotate 5s ease-out forwards;
+}
+/* @font-face {
+  font-family: 'Cairo';
+  src: url('/fonts/cairo.woff2') format('woff2');
+  font-display: swap;
+} */
+ .scroll-item.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.font_mal{
+font-family: 'Noto Sans Malayalam', sans-serif;
+}
+.tabs_ppty button{
+  background-color: #f4f4f4;
+  padding-inline: 10px;
+}
+.textEllipsis{
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
