@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Bell,
   BookOpen,
@@ -19,8 +18,13 @@ import {
   HelpCircle,
   ArrowRight,
 } from "lucide-react";
-import { useLocation } from "react-router-dom";
+
 import logo from "../../assets/logo.png";
+import { useDispatch, useSelector } from "react-redux";
+import { avatars } from "./avatars";
+import { useEffect, useState } from "react";
+import { setUser, logoutUser } from "../../redux/authSlice";
+import { useNavigate } from "react-router-dom";
 
 const navItems = [
   { label: "Dashboard", icon: Home, active: true },
@@ -180,10 +184,39 @@ function StatCard({ stat }) {
 }
 
 export default function DashboardKpsc() {
-  const { state } = useLocation();
+  const navigate = useNavigate();
 
-  const userInfo =
-    state || JSON.parse(localStorage.getItem("userInfo"));
+  const [toggleMenu, setToggleMenu] = useState(false);
+
+
+  const handleToggleMenu = () => setToggleMenu(prev => !prev);
+
+
+const dispatch = useDispatch();
+
+const userInfo = useSelector(
+  (state) => state.auth.user
+);
+
+useEffect(() => {
+
+  const savedUser =
+    sessionStorage.getItem("user");
+
+  if (savedUser) {
+    dispatch(setUser(JSON.parse(savedUser)));
+  }
+
+}, [dispatch]);
+
+const handleLogout = () => {
+  dispatch(logoutUser());
+
+  sessionStorage.clear();
+
+  navigate("/");
+};
+
   return (
     <div className="min-h-screen bg-[#f8fbff] font-sans text-blue-950">
       <aside className="fixed left-0 top-0 flex h-screen w-72 flex-col bg-gradient-to-b from-[#061b4d] via-[#082c76] to-[#003a99] px-4 shadow-2xl">
@@ -221,23 +254,64 @@ export default function DashboardKpsc() {
       </aside>
 
       <main className="ml-72 min-h-screen">
-        <header className="flex h-20 items-center justify-end gap-6 border-b border-blue-100 bg-white px-8">
-          <div className="flex gap-2">
-     
-      <p>Email: {userInfo?.email}</p>
-      <p>Mobile: {userInfo?.mobile}</p>
-    
+      <header className="flex h-20 items-center justify-end gap-6 border-b border-blue-100 bg-white px-8">
+  
+  {/* User Details */}
+  <div className="flex flex-row gap-6 text-sm">
+    <p>Name: {userInfo?.name}</p>
+    <p>Email: {userInfo?.email}</p>
+    <p>Mobile: {userInfo?.mobile}</p>
+  </div>
+
+  {/* Notification */}
+  <div className="relative">
+    <Bell className="h-7 w-7 text-blue-950" />
+
+    <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+      3
+    </span>
+  </div>
+
+  {/* Profile Section */}
+  
+
+
+<div className="relative flex items-center gap-3">
+
+  <img
+    src={userInfo?.avatar || avatars[0]}
+    alt="Profile"
+    className="h-12 w-12 rounded-full border border-blue-100 object-cover"
+  />
+
+  <span className="font-bold text-blue-950">
+    {userInfo?.name}
+  </span>
+
+  <ChevronDown
+    className="h-5 w-5 text-blue-950 cursor-pointer"
+    onClick={handleToggleMenu}
+  />
+
+  {toggleMenu && (
+    <div className="absolute right-0 top-16 bg-white shadow-xl rounded-xl p-4 w-52 border z-50">
+      <button className="block w-full text-left py-2 hover:text-blue-600">
+        My Profile
+      </button>
+
+      <button className="block w-full text-left py-2 hover:text-blue-600">
+        Settings
+      </button>
+
+      <button className="block w-full text-left py-2 text-red-500" onClick={()=>handleLogout()}>
+        Logout
+      </button>
     </div>
-          <div className="relative">
-            <Bell className="h-7 w-7 text-blue-950" />
-            <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">3</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full border border-blue-100 bg-gradient-to-br from-slate-100 to-slate-300" />
-            <span className="font-bold">John Doe</span>
-            <ChevronDown className="h-5 w-5" />
-          </div>
-        </header>
+  )}
+</div>
+ 
+
+</header>
 
         <section className="p-8">
           <div className="rounded-3xl border border-blue-100 bg-white p-5 shadow-xl shadow-blue-950/5">
@@ -246,10 +320,10 @@ export default function DashboardKpsc() {
               
 
               <div className="relative z-10 max-w-2xl">
-                <p className="text-lg text-slate-600">Welcome back, {userInfo.name} 👋</p>
+                <p className="text-lg text-slate-600">Welcome back, {userInfo?.name} 👋</p>
                 <h2 className="mt-6 text-3xl font-black leading-tight tracking-tight text-[#071c59]">
-                  Ace Your <span className="text-sky-500"> Kerala PSC</span>
-                   Exams with Confidence
+                  Ace Your  <span className="text-sky-500 px-2"> Kerala PSC</span>
+                    Exams with Confidence
                 </h2>
                 <p className="mt-5 max-w-xl text-md leading-8 text-slate-700">
                   Your one-stop destination for all study resources, mock tests, and exam preparation.
@@ -283,18 +357,18 @@ export default function DashboardKpsc() {
               ))}
             </div>
 
-            <div className="mt-8 flex items-center justify-between">
+            {/* <div className="mt-8 flex items-center justify-between">
               <h2 className="text-xl font-extrabold">Your Progress</h2>
               <button className="flex items-center gap-2 text-sm font-semibold text-blue-600">
                 View Detailed Performance
                 <ChevronRight className="h-5 w-5" />
               </button>
-            </div>
-            <div className="mt-4 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            </div> */}
+            {/* <div className="mt-4 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
               {stats.map((stat) => (
                 <StatCard key={stat.title} stat={stat} />
               ))}
-            </div>
+            </div> */}
           </div>
         </section>
       </main>

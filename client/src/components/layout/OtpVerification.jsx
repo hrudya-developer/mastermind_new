@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+import { avatars } from "./avatars";
 import {
   ArrowLeft,
   ShieldCheck,
@@ -11,6 +12,9 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 
+import { useDispatch } from "react-redux";
+import {setUser} from "../../redux/authSlice";
+
 const RESEND_SECONDS = 45;
 
 const API_BASE_URL =
@@ -19,6 +23,7 @@ const API_BASE_URL =
 
 export default function OtpVerification() {
   const navigate = useNavigate();
+    const dispatch = useDispatch();
 
   const [otp, setOtp] = useState(["", "", "", ""]);
   const inputRefs = useRef([]);
@@ -213,22 +218,55 @@ if (response.data.status === true) {
     console.log("PROFILE RESPONSE:", profileResponse.data);
 
     // EXISTING USER
-    if (
-      profileResponse.data.status === true &&
-      profileResponse.data.data
-    ) {
+if (
+  profileResponse.data.status === true &&
+  profileResponse.data.data
+) {
 
-      Swal.fire({
-        icon: "success",
-        title: "Login Successful",
-        text: "Welcome back",
-        confirmButtonText: "Continue",
-        confirmButtonColor: "#7c3aed",
-      }).then(() => {
-        navigate("/dashboard");
-      });
+  console.log("PROFILE USER DATA:", profileResponse.data.data);
 
-    }
+const profileData = profileResponse.data.data[0];
+
+console.log("DISPATCH DATA:", {
+  user: profileData,
+  uid: uid,
+  token: response.data.token || null,
+});
+
+const userData = {
+  api: "psc@Miak2022",
+  name: profileData.name || "",
+  email: profileData.emailId || "",
+  mobile: profileData.mobile || "",
+  dob: profileData.dob || "",
+  place: profileData.place || "",
+  promocode: profileData.promocode || "",
+  code: profileData.code || "91",
+  uid: uid,
+  avatar: avatars[(profileData.avatar || 1) - 1],
+};
+
+// SAVE TO REDUX
+dispatch(setUser(userData));
+
+// SAVE TO SESSION STORAGE
+sessionStorage.setItem(
+  "user",
+  JSON.stringify(userData)
+);
+console.log("AFTER DISPATCH");
+
+  Swal.fire({
+    icon: "success",
+    title: "Login Successful",
+    text: "Welcome back",
+    confirmButtonText: "Continue",
+    confirmButtonColor: "#7c3aed",
+  }).then(() => {
+    navigate("/kspc_dashboard");
+  });
+
+}
 
     // NEW USER
     else {
@@ -348,6 +386,8 @@ if (response.data.status === true) {
       setResendLoading(false);
     }
   };
+
+
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 px-4 py-8 sm:px-6 lg:px-10 flex items-center justify-center overflow-hidden">

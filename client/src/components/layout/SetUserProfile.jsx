@@ -19,19 +19,20 @@ import {
   Check,
 } from "lucide-react";
 
+import { avatars } from "./avatars";
+
+import { useDispatch } from "react-redux";
+import { setUser } from "../../redux/authSlice";
+
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   "http://psc.technocitysolutions.com/public/api";
 
-const avatars = [
-  "https://cdn-icons-png.flaticon.com/128/4128/4128373.png",
-  "https://cdn-icons-png.flaticon.com/512/4140/4140037.png",
-  "https://cdn-icons-png.flaticon.com/128/4139/4139970.png",
-  "https://cdn-icons-png.flaticon.com/512/4140/4140047.png",
-];
+
 
 export default function SetUserProfile() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const loginIdentifier =
     sessionStorage.getItem("login_identifier") || "";
@@ -53,6 +54,7 @@ export default function SetUserProfile() {
     loginType === "email" ? loginIdentifier : "";
 
   const [selectedAvatar, setSelectedAvatar] = useState(0);
+
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState(initialMobile);
   const [email, setEmail] = useState(initialEmail);
@@ -81,6 +83,7 @@ export default function SetUserProfile() {
       alert(
         "User ID missing. Please verify OTP again before setting profile."
       );
+
       navigate("/sendOtpLogin");
       return;
     }
@@ -99,7 +102,9 @@ export default function SetUserProfile() {
       formData.append("promocode", promocode);
       formData.append("code", "91");
       formData.append("uid", uid);
-      formData.append("avatar", avatars[selectedAvatar]);
+
+      // send avatar index to backend
+      formData.append("avatar", selectedAvatar + 1);
 
       const response = await axios.post(
         `${API_BASE_URL}/setUserProfile`,
@@ -108,16 +113,41 @@ export default function SetUserProfile() {
           headers: {
             Accept: "application/json",
           },
-          // withCredentials: true,
         }
       );
 
       console.log("PROFILE RESPONSE:", response.data);
 
-      if (response.data.status === true) {
-        alert("Profile Updated Successfully");
-        navigate("/kspc_dashboard");
-      } else {
+if (response.data.status === true) {
+
+  const userData = {
+    api: "psc@Miak2022",
+    name,
+    email,
+    mobile,
+    dob,
+    place,
+    promocode,
+    code: "91",
+    uid,
+
+    // save avatar image directly
+    avatar: avatars[selectedAvatar],
+  };
+
+  // SAVE IN REDUX
+  dispatch(setUser(userData));
+
+  // SAVE IN SESSION STORAGE
+  sessionStorage.setItem(
+    "user",
+    JSON.stringify(userData)
+  );
+
+  alert("Profile Updated Successfully");
+
+  navigate("/kspc_dashboard");
+} else {
         alert(
           response.data.message ||
             response.data.msg ||
@@ -144,9 +174,14 @@ export default function SetUserProfile() {
 
   return (
     <div className="min-h-screen bg-[#f6f8fb] flex flex-col">
+      {/* HEADER */}
       <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-3">
-          <img src={logo} alt="logo" className="h-12 object-contain" />
+          <img
+            src={logo}
+            alt="logo"
+            className="h-12 object-contain"
+          />
         </div>
 
         <div className="flex items-center gap-6">
@@ -155,14 +190,17 @@ export default function SetUserProfile() {
             Help
           </button>
 
-          <Bell className="text-gray-600 cursor-pointer" size={22} />
+          <Bell
+            className="text-gray-600 cursor-pointer"
+            size={22}
+          />
 
           <div className="flex items-center gap-3 cursor-pointer">
-            <img
-              src={avatars[selectedAvatar]}
-              alt="profile"
-              className="w-11 h-11 rounded-full object-cover"
-            />
+ <img
+  src={avatars[selectedAvatar]}
+  alt="Profile"
+  className="h-12 w-12 rounded-full border border-blue-100 object-cover"
+/>
 
             <div className="hidden md:block">
               <h3 className="font-semibold text-gray-800">
@@ -174,22 +212,48 @@ export default function SetUserProfile() {
       </header>
 
       <div className="flex flex-1">
+        {/* SIDEBAR */}
         <aside className="hidden lg:flex flex-col justify-between w-72 bg-white border-r border-gray-200 p-6">
           <div className="space-y-3">
-            <SidebarItem icon={<User size={20} />} active text="Profile" />
-            <SidebarItem icon={<LayoutDashboard size={20} />} text="Dashboard" />
-            <SidebarItem icon={<FileText size={20} />} text="Applications" />
-            <SidebarItem icon={<MessageSquare size={20} />} text="Messages" />
-            <SidebarItem icon={<Settings size={20} />} text="Settings" />
+            <SidebarItem
+              icon={<User size={20} />}
+              active
+              text="Profile"
+            />
+
+            <SidebarItem
+              icon={<LayoutDashboard size={20} />}
+              text="Dashboard"
+            />
+
+            <SidebarItem
+              icon={<FileText size={20} />}
+              text="Applications"
+            />
+
+            <SidebarItem
+              icon={<MessageSquare size={20} />}
+              text="Messages"
+            />
+
+            <SidebarItem
+              icon={<Settings size={20} />}
+              text="Settings"
+            />
           </div>
 
           <div onClick={handleLogout}>
-            <SidebarItem icon={<LogOut size={20} />} text="Logout" />
+            <SidebarItem
+              icon={<LogOut size={20} />}
+              text="Logout"
+            />
           </div>
         </aside>
 
+        {/* MAIN */}
         <main className="flex-1 p-4 md:p-8">
           <div className="max-w-[1500px] mx-auto grid grid-cols-1 xl:grid-cols-[1fr_350px] gap-8">
+            {/* FORM */}
             <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-5 md:p-10">
               <div className="mb-10">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
@@ -201,6 +265,7 @@ export default function SetUserProfile() {
                 </p>
               </div>
 
+              {/* AVATAR SECTION */}
               <div className="mb-10">
                 <h3 className="font-semibold text-gray-900 mb-5 text-lg">
                   Choose profile avatar
@@ -237,62 +302,38 @@ export default function SetUserProfile() {
                 </div>
               </div>
 
+              {/* FORM INPUTS */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block mb-2 font-medium text-gray-700">
-                    Name
-                  </label>
+                <InputField
+                  label="Name"
+                  value={name}
+                  onChange={setName}
+                  placeholder="Enter your full name"
+                />
 
-                  <input
-                    type="text"
-                    placeholder="Enter your full name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full h-14 px-5 rounded-xl border border-gray-300 outline-none focus:border-blue-500"
-                  />
-                </div>
+                <InputField
+                  label="Phone Number"
+                  value={mobile}
+                  onChange={setMobile}
+                  placeholder="Enter mobile number"
+                />
 
-                <div>
-                  <label className="block mb-2 font-medium text-gray-700">
-                    Phone number
-                  </label>
+                <InputField
+                  label="Email"
+                  value={email}
+                  onChange={setEmail}
+                  placeholder="Enter email"
+                  type="email"
+                />
 
-                  <input
-                    type="text"
-                    placeholder="Enter mobile number"
-                    value={mobile}
-                    onChange={(e) => setMobile(e.target.value)}
-                    className="w-full h-14 px-5 rounded-xl border border-gray-300 outline-none focus:border-blue-500"
-                  />
-                </div>
+                <InputField
+                  label="Date of Birth"
+                  value={dob}
+                  onChange={setDob}
+                  type="date"
+                />
 
-                <div>
-                  <label className="block mb-2 font-medium text-gray-700">
-                    Email
-                  </label>
-
-                  <input
-                    type="email"
-                    placeholder="Enter your email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-14 px-5 rounded-xl border border-gray-300 outline-none focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-2 font-medium text-gray-700">
-                    Date of birth
-                  </label>
-
-                  <input
-                    type="date"
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    className="w-full h-14 px-5 rounded-xl border border-gray-300 outline-none focus:border-blue-500"
-                  />
-                </div>
-
+                {/* PLACE */}
                 <div>
                   <label className="block mb-2 font-medium text-gray-700">
                     Place
@@ -301,15 +342,34 @@ export default function SetUserProfile() {
                   <div className="relative">
                     <select
                       value={place}
-                      onChange={(e) => setPlace(e.target.value)}
+                      onChange={(e) =>
+                        setPlace(e.target.value)
+                      }
                       className="w-full h-14 px-5 rounded-xl border border-gray-300 outline-none appearance-none focus:border-blue-500 bg-white"
                     >
-                      <option value="">Select District</option>
-                      <option value="Kozhikode">Kozhikode</option>
-                      <option value="Kannur">Kannur</option>
-                      <option value="Malappuram">Malappuram</option>
-                      <option value="Wayanad">Wayanad</option>
-                      <option value="Kasaragod">Kasaragod</option>
+                      <option value="">
+                        Select District
+                      </option>
+
+                      <option value="Kozhikode">
+                        Kozhikode
+                      </option>
+
+                      <option value="Kannur">
+                        Kannur
+                      </option>
+
+                      <option value="Malappuram">
+                        Malappuram
+                      </option>
+
+                      <option value="Wayanad">
+                        Wayanad
+                      </option>
+
+                      <option value="Kasaragod">
+                        Kasaragod
+                      </option>
                     </select>
 
                     <ChevronDown
@@ -319,30 +379,27 @@ export default function SetUserProfile() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block mb-2 font-medium text-gray-700">
-                    Referral code
-                  </label>
-
-                  <input
-                    type="text"
-                    placeholder="Enter referral code"
-                    value={promocode}
-                    onChange={(e) => setPromocode(e.target.value)}
-                    className="w-full h-14 px-5 rounded-xl border border-gray-300 outline-none focus:border-blue-500"
-                  />
-                </div>
+                <InputField
+                  label="Referral Code"
+                  value={promocode}
+                  onChange={setPromocode}
+                  placeholder="Enter referral code"
+                />
               </div>
 
+              {/* BUTTON */}
               <button
                 onClick={handleSubmit}
                 disabled={loading}
                 className="w-full mt-8 h-14 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold text-lg hover:scale-[1.01] transition-all duration-300 shadow-lg shadow-blue-200 disabled:opacity-70"
               >
-                {loading ? "PLEASE WAIT..." : "CONTINUE"}
+                {loading
+                  ? "PLEASE WAIT..."
+                  : "CONTINUE"}
               </button>
             </div>
 
+            {/* PREVIEW */}
             <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8 h-fit">
               <h3 className="text-2xl font-bold text-gray-900 mb-8">
                 Your profile preview
@@ -391,6 +448,32 @@ export default function SetUserProfile() {
   );
 }
 
+/* INPUT FIELD */
+const InputField = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+}) => {
+  return (
+    <div>
+      <label className="block mb-2 font-medium text-gray-700">
+        {label}
+      </label>
+
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full h-14 px-5 rounded-xl border border-gray-300 outline-none focus:border-blue-500"
+      />
+    </div>
+  );
+};
+
+/* SIDEBAR ITEM */
 const SidebarItem = ({ icon, text, active }) => {
   return (
     <button
@@ -406,6 +489,7 @@ const SidebarItem = ({ icon, text, active }) => {
   );
 };
 
+/* INFO ITEM */
 const InfoItem = ({ icon, label, value }) => {
   return (
     <div className="flex items-center justify-between border-b border-gray-100 pb-4">
@@ -414,7 +498,9 @@ const InfoItem = ({ icon, label, value }) => {
         <span>{label}</span>
       </div>
 
-      <span className="text-gray-500 text-sm">{value}</span>
+      <span className="text-gray-500 text-sm">
+        {value}
+      </span>
     </div>
   );
 };
